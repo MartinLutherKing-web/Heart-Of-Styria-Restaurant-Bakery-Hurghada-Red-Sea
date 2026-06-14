@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heart of Styria - Austrian Bakery & Restaurant Hurghada</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Alpine.js CDN for lightweight interactive state -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans: ['Lato', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Lato', sans-serif;
+      background-color: #FFF8F0;
+      color: #3D2B1F;
+    }
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<script src="/_aistudio-iframe.js"></script></head>
+<body x-data="appState()">
+
+  <!-- Sticky Header -->
+  <nav :class="isScrolled ? 'bg-[#FFF8F0]/95 backdrop-blur-md shadow-lg border-b border-[#D4A373]/20' : 'bg-transparent'" 
+       class="fixed top-0 left-0 right-0 z-50 h-[76px] px-4 md:px-8 transition-all duration-300 flex items-center justify-between">
+    
+    <!-- Brand Logo -->
+    <a href="#" @click.prevent="scrollToSection('hero')" class="flex flex-col items-start text-left">
+      <span :class="isScrolled ? 'text-[#2C1810]' : 'text-white'" class="font-serif text-lg md:text-xl font-bold transition-colors duration-300">
+        Heart of Styria
+      </span>
+      <span :class="isScrolled ? 'text-[#D4A373]' : 'text-white/80'" class="text-[9px] md:text-[10px] tracking-widest uppercase transition-colors duration-300">
+        <span x-text="t('nav.sub')"></span>
+      </span>
+    </a>
+
+    <!-- Desktop Menu -->
+    <ul class="hidden md:flex items-center gap-1 list-none m-0 p-0">
+      <li>
+        <button @click="scrollToSection('hero')" :class="activeSection === 'hero' ? (isScrolled ? 'text-[#8B5E3C] bg-[#D4A373]/15' : 'text-white bg-white/20') : (isScrolled ? 'text-[#2C1810] hover:text-[#8B5E3C] hover:bg-[#D4A373]/10' : 'text-white/85 hover:text-white hover:bg-white/10')" class="text-xs tracking-wider uppercase font-bold py-2 px-3.5 rounded-md cursor-pointer transition-all duration-200">
+          <span x-text="t('nav.home')"></span>
+        </button>
+      </li>
+      <li>
+        <button @click="scrollToSection('about')" :class="activeSection === 'about' ? (isScrolled ? 'text-[#8B5E3C] bg-[#D4A373]/15' : 'text-white bg-white/20') : (isScrolled ? 'text-[#2C1810] hover:text-[#8B5E3C] hover:bg-[#D4A373]/10' : 'text-white/85 hover:text-white hover:bg-white/10')" class="text-xs tracking-wider uppercase font-bold py-2 px-3.5 rounded-md cursor-pointer transition-all duration-200">
+          <span x-text="t('nav.about')"></span>
+        </button>
+      </li>
+      <li>
+        <button @click="scrollToSection('menu')" :class="activeSection === 'menu' ? (isScrolled ? 'text-[#8B5E3C] bg-[#D4A373]/15' : 'text-white bg-white/20') : (isScrolled ? 'text-[#2C1810] hover:text-[#8B5E3C] hover:bg-[#D4A373]/10' : 'text-white/85 hover:text-white hover:bg-white/10')" class="text-xs tracking-wider uppercase font-bold py-2 px-3.5 rounded-md cursor-pointer transition-all duration-200">
+          <span x-text="t('nav.menu')"></span>
+        </button>
+      </li>
+      <li>
+        <button @click="scrollToSection('reviews')" :class="activeSection === 'reviews' ? (isScrolled ? 'text-[#8B5E3C] bg-[#D4A373]/15' : 'text-white bg-white/20') : (isScrolled ? 'text-[#2C1810] hover:text-[#8B5E3C] hover:bg-[#D4A373]/10' : 'text-white/85 hover:text-white hover:bg-white/10')" class="text-xs tracking-wider uppercase font-bold py-2 px-3.5 rounded-md cursor-pointer transition-all duration-200">
+          <span x-text="t('nav.reviews')"></span>
+        </button>
+      </li>
+      <li>
+        <button @click="scrollToSection('contact')" :class="activeSection === 'contact' ? (isScrolled ? 'text-[#8B5E3C] bg-[#D4A373]/15' : 'text-white bg-white/20') : (isScrolled ? 'text-[#2C1810] hover:text-[#8B5E3C] hover:bg-[#D4A373]/10' : 'text-white/85 hover:text-white hover:bg-white/10')" class="text-xs tracking-wider uppercase font-bold py-2 px-3.5 rounded-md cursor-pointer transition-all duration-200">
+          <span x-text="t('nav.contact')"></span>
+        </button>
+      </li>
+    </ul>
+
+    <!-- Controls Container -->
+    <div class="flex items-center gap-3">
+      <!-- Language Picker -->
+      <div class="relative">
+        <button @click="isLangOpen = !isLangOpen" :class="isScrolled ? 'border-[#D4A373]/40 bg-[#D4A373]/10 text-[#2C1810] hover:bg-[#D4A373]/20' : 'border-white/30 bg-white/10 text-white hover:bg-white/20'" class="flex items-center gap-1.5 py-1.5 px-3 rounded-full border text-xs font-bold transition-all duration-200 cursor-pointer">
+          <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+          <span class="uppercase font-mono" x-text="lang"></span>
+          <i data-lucide="chevron-down" class="w-3 h-3 opacity-70"></i>
+        </button>
+
+        <!-- Dropdown -->
+        <div x-show="isLangOpen" @click.away="isLangOpen = false" class="absolute right-0 mt-2 w-36 bg-white border border-[#D4A373]/30 rounded-lg shadow-xl overflow-hidden z-50 transform origin-top-right transition-all">
+          <button @click="lang = 'en'; isLangOpen = false" :class="lang === 'en' ? 'text-[#F4A261] bg-[#FFF8F0]' : 'text-[#2C1810] hover:text-[#F4A261] hover:bg-[#FFF8F0]'" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-xs font-bold">
+            🇬🇧 English
+          </button>
+          <button @click="lang = 'de'; isLangOpen = false" :class="lang === 'de' ? 'text-[#F4A261] bg-[#FFF8F0]' : 'text-[#2C1810] hover:text-[#F4A261] hover:bg-[#FFF8F0]'" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-xs font-bold">
+            🇩🇪 Deutsch
+          </button>
+        </div>
+      </div>
+
+      <!-- Hamburger (Mobile Only) -->
+      <button @click="isMobileMenuOpen = !isMobileMenuOpen" :class="isScrolled ? 'text-[#2C1810] hover:bg-[#D4A373]/10' : 'text-white hover:bg-white/10'" class="p-2 rounded-md md:hidden transition-colors">
+        <i x-show="!isMobileMenuOpen" data-lucide="menu" class="w-6 h-6"></i>
+        <i x-show="isMobileMenuOpen" data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer Block -->
+    <div x-show="isMobileMenuOpen" class="fixed inset-0 top-[76px] z-30 bg-[#2C1810]/40 backdrop-blur-sm md:hidden" @click="isMobileMenuOpen = false"></div>
+    <div x-show="isMobileMenuOpen" class="fixed top-[76px] left-0 right-0 bg-[#FFF8F0] border-b border-[#D4A373]/20 shadow-xl z-40 p-4 transform origin-top transition-all duration-300 md:hidden">
+      <ul class="list-none p-0 m-0 flex flex-col gap-1">
+        <li>
+          <button @click="scrollToSection('hero'); isMobileMenuOpen = false" :class="activeSection === 'hero' ? 'text-[#F4A261] bg-[#D4A373]/12' : 'text-[#2C1810] hover:text-[#F4A261] hover:bg-[#D4A373]/5'" class="w-full text-left py-3 px-4 rounded-lg font-bold text-sm tracking-wider uppercase transition-all duration-150">
+            <span x-text="t('nav.home')"></span>
+          </button>
+        </li>
+        <li>
+          <button @click="scrollToSection('about'); isMobileMenuOpen = false" :class="activeSection === 'about' ? 'text-[#F4A261] bg-[#D4A373]/12' : 'text-[#2C1810] hover:text-[#F4A261] hover:bg-[#D4A373]/5'" class="w-full text-left py-3 px-4 rounded-lg font-bold text-sm tracking-wider uppercase transition-all duration-150">
+            <span x-text="t('nav.about')"></span>
+          </button>
+        </li>
+        <li>
+          <button @click="scrollToSection('menu'); isMobileMenuOpen = false" :class="activeSection === 'menu' ? 'text-[#F4A261] bg-[#D4A373]/12' : 'text-[#2C1810] hover:text-[#F4A261] hover:bg-[#D4A373]/5'" class="w-full text-left py-3 px-4 rounded-lg font-bold text-sm tracking-wider uppercase transition-all duration-150">
+            <span x-text="t('nav.menu')"></span>
+          </button>
+        </li>
+        <li>
+          <button @click="scrollToSection('reviews'); isMobileMenuOpen = false" :class="activeSection === 'reviews' ? 'text-[#F4A261] bg-[#D4A373]/12' : 'text-[#2C1810] hover:text-[#F4A261] hover:bg-[#D4A373]/5'" class="w-full text-left py-3 px-4 rounded-lg font-bold text-sm tracking-wider uppercase transition-all duration-150">
+            <span x-text="t('nav.reviews')"></span>
+          </button>
+        </li>
+        <li>
+          <button @click="scrollToSection('contact'); isMobileMenuOpen = false" :class="activeSection === 'contact' ? 'text-[#F4A261] bg-[#D4A373]/12' : 'text-[#2C1810] hover:text-[#F4A261] hover:bg-[#D4A373]/5'" class="w-full text-left py-3 px-4 rounded-lg font-bold text-sm tracking-wider uppercase transition-all duration-150">
+            <span x-text="t('nav.contact')"></span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="hero" class="relative min-h-screen bg-gradient-to-br from-[#2C1810] via-[#4A2C17] to-[#8B5E3C] flex items-center justify-center overflow-hidden px-4 pt-[100px] pb-16">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_40%,rgba(212,163,115,0.18)_0%,transparent_75%)] pointer-events-none"></div>
+    <div class="absolute top-1/4 left-[10%] w-2 h-2 rounded-full bg-white/10 animate-pulse pointer-events-none"></div>
+    <div class="absolute top-2/3 left-[20%] w-3 h-3 rounded-full bg-[#E9C46A]/20 animate-bounce pointer-events-none duration-1000"></div>
+
+    <div class="relative z-10 text-center max-w-3xl mx-auto flex flex-col items-center">
+      <!-- Badge element -->
+      <div class="inline-flex items-center gap-2 bg-white/10 border border-white/15 backdrop-blur-md px-4.5 py-2 rounded-full mb-8">
+        <i data-lucide="heart" class="w-4 h-4 text-[#E9C46A] fill-[#E9C46A] animate-pulse"></i>
+        <span class="text-[10px] md:text-xs tracking-widest text-white/90 font-bold uppercase" x-text="t('hero.eyebrow')"></span>
+      </div>
+
+      <h1 class="font-serif text-5xl sm:text-6xl md:text-8xl font-black text-white leading-none mb-4 drop-shadow-2xl">
+        Heart of <br />
+        <span class="italic text-[#E9C46A] font-light font-sans" x-text="lang === 'de' ? 'Steiermark' : 'Styria'"></span>
+      </h1>
+
+      <p class="font-serif italic text-xl sm:text-2xl text-white/80 mb-6 font-semibold animate-pulse" x-text="t('hero.tagline')"></p>
+      
+      <p class="text-white/70 max-w-lg mb-10 text-sm md:text-base leading-relaxed" x-text="t('hero.desc')"></p>
+
+      <div class="flex flex-col sm:flex-row gap-4 items-center justify-center w-full">
+        <button @click="scrollToSection('menu')" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-[#E9C46A] to-[#F4A261] text-[#2C1810]" class="font-bold rounded-lg text-xs tracking-wider uppercase shadow-lg hover:shadow-[#E9C46A]/25 cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2">
+          <span x-text="t('hero.btn1')"></span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+        <button @click="scrollToSection('contact')" class="w-full sm:w-auto px-8 py-3.5 bg-white/10 border border-white/20 text-white font-bold rounded-lg text-xs tracking-wider uppercase hover:bg-white/15 backdrop-blur-md cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2">
+          <i data-lucide="eye" class="w-4 h-4"></i>
+          <span x-text="t('hero.btn2')"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Wavy divider -->
+    <div class="absolute bottom-0 left-0 right-0 z-10 overflow-hidden">
+      <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="relative block w-full h-[32px] sm:h-[48px] md:h-[64px]">
+        <path d="M0,60 C360,0 1080,90 1440,30 L1440,80 L0,80Z" fill="#FFF8F0" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- Interactive Comparer Slider Section -->
+  <section class="relative bg-[#FFF8F0] py-20 px-4 overflow-hidden">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#F4A261] uppercase mb-3">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span x-text="t('scroll.tag')"></span>
+        </div>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-[#2C1810]">
+          <span x-show="lang === 'en'">From the <span class="italic text-[#F4A261]">Alps</span> to the Red Sea</span>
+          <span x-show="lang === 'de'">Von den <span class="italic text-[#F4A261]">Alpen</span> zum Roten Meer</span>
+        </h2>
+        <p class="text-[#6B4C3B] text-sm md:text-base max-w-2xl mx-auto mt-4 leading-relaxed" x-text="t('scroll.contentDesc')"></p>
+      </div>
+
+      <!-- Comparison Slider Box -->
+      <div class="relative select-none cursor-ew-resize rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl bg-[#2C1810] h-[340px] sm:h-[460px] border border-[#D4A373]/20"
+           @mousemove="moveSlider($event)" @touchmove="moveSliderTouch($event)">
+        
+        <!-- Base Background (Red Sea, Egypt) -->
+        <div class="absolute inset-0 w-full h-full">
+          <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1000&q=80&auto=format&fit=crop" class="w-full h-full object-cover object-center pointer-events-none">
+          <div class="absolute inset-0 bg-[#2C1810]/30"></div>
+          <div class="absolute right-6 bottom-6 text-right text-white z-10 pointer-events-none">
+            <span class="inline-block bg-[#2C1810]/70 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase mb-1.5 border border-white/10">🇪🇬 Egypt</span>
+            <h4 class="font-serif text-xl font-bold">Hurghada</h4>
+            <p class="text-white/80 text-xs" x-text="t('img.hurghada')"></p>
+          </div>
+        </div>
+
+        <!-- Sliding top layer (Styrian Alps, Austria) -->
+        <div class="absolute inset-y-0 left-0 overflow-hidden" :style="'width: ' + sliderPos + '%'">
+          <div class="absolute inset-0 min-w-[320px] h-full" style="width: 100%;">
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000&q=80&auto=format&fit=crop" class="w-full h-full object-cover object-center pointer-events-none" style="width: 100vw; max-width: none;">
+            <div class="absolute inset-0 bg-[#2C1810]/20"></div>
+            <div class="absolute left-6 bottom-6 text-left text-white z-10 pointer-events-none">
+              <span class="inline-block bg-black/50 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase mb-1.5 border border-white/10">🇦🇹 Austria</span>
+              <h4 class="font-serif text-xl font-bold">Styria</h4>
+              <p class="text-white/80 text-xs" x-text="t('img.austria')"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Separator Bar -->
+        <div class="absolute inset-y-0 z-20 w-1 bg-[#E9C46A] pointer-events-none shadow-[0_0_10px_rgba(233,196,106,0.5)]" :style="'left: ' + sliderPos + '%'">
+          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#E9C46A] text-[#2C1810] flex items-center justify-center shadow-lg border-2 border-white">
+            <span class="text-[10px] font-bold tracking-tighter">◀▶</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section class="relative bg-gradient-to-br from-[#2C1810] to-[#452818] py-20 px-4 overflow-hidden">
+    <div class="max-w-6xl mx-auto relative z-10">
+      <div class="text-center mb-16">
+        <span class="text-[#E9C46A] tracking-widest text-xs font-bold uppercase block mb-3" x-text="t('features.tag')"></span>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-white max-w-2xl mx-auto leading-tight">
+          <span x-show="lang === 'en'">Everything You <span class="text-[#E9C46A] italic">Love</span> About Austria</span>
+          <span x-show="lang === 'de'">Alles was Sie an Österreich <span class="text-[#E9C46A] italic">lieben</span></span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Feature 1 -->
+        <div class="relative group bg-white/5 border border-white/10 hover:border-[#D4A373]/30 backdrop-blur-md rounded-2xl p-6 transition-all duration-300 hover:-translate-y-2">
+          <div class="w-[52px] h-[52px] rounded-full bg-white/5 flex items-center justify-center text-2xl mb-5">🥐</div>
+          <h3 class="font-serif text-lg font-bold text-white mb-2" x-text="t('features.f1.title')"></h3>
+          <p class="text-white/60 text-xs md:text-sm leading-relaxed" x-text="t('features.f1.desc')"></p>
+        </div>
+        <!-- Feature 2 -->
+        <div class="relative group bg-white/5 border border-white/10 hover:border-[#D4A373]/30 backdrop-blur-md rounded-2xl p-6 transition-all duration-300 hover:-translate-y-2">
+          <div class="w-[52px] h-[52px] rounded-full bg-white/5 flex items-center justify-center text-2xl mb-5">🍞</div>
+          <h3 class="font-serif text-lg font-bold text-white mb-2" x-text="t('features.f2.title')"></h3>
+          <p class="text-white/60 text-xs md:text-sm leading-relaxed" x-text="t('features.f2.desc')"></p>
+        </div>
+        <!-- Feature 3 -->
+        <div class="relative group bg-white/5 border border-white/10 hover:border-[#D4A373]/30 backdrop-blur-md rounded-2xl p-6 transition-all duration-300 hover:-translate-y-2">
+          <div class="w-[52px] h-[52px] rounded-full bg-white/5 flex items-center justify-center text-2xl mb-5">☕</div>
+          <h3 class="font-serif text-lg font-bold text-white mb-2" x-text="t('features.f3.title')"></h3>
+          <p class="text-white/60 text-xs md:text-sm leading-relaxed" x-text="t('features.f3.desc')"></p>
+        </div>
+        <!-- Feature 4 -->
+        <div class="relative group bg-white/5 border border-white/10 hover:border-[#D4A373]/30 backdrop-blur-md rounded-2xl p-6 transition-all duration-300 hover:-translate-y-2">
+          <div class="w-[52px] h-[52px] rounded-full bg-white/5 flex items-center justify-center text-2xl mb-5">🍽️</div>
+          <h3 class="font-serif text-lg font-bold text-white mb-2" x-text="t('features.f4.title')"></h3>
+          <p class="text-white/60 text-xs md:text-sm leading-relaxed" x-text="t('features.f4.desc')"></p>
+        </div>
+        <!-- Feature 5 -->
+        <div class="relative group bg-white/5 border border-white/10 hover:border-[#D4A373]/30 backdrop-blur-md rounded-2xl p-6 transition-all duration-300 hover:-translate-y-2">
+          <div class="w-[52px] h-[52px] rounded-full bg-white/5 flex items-center justify-center text-2xl mb-5">❤️</div>
+          <h3 class="font-serif text-lg font-bold text-white mb-2" x-text="t('features.f5.title')"></h3>
+          <p class="text-white/60 text-xs md:text-sm leading-relaxed" x-text="t('features.f5.desc')"></p>
+        </div>
+        <!-- Feature 6 -->
+        <div class="relative group bg-white/5 border border-white/10 hover:border-[#D4A373]/30 backdrop-blur-md rounded-2xl p-6 transition-all duration-300 hover:-translate-y-2">
+          <div class="w-[52px] h-[52px] rounded-full bg-white/5 flex items-center justify-center text-2xl mb-5">💰</div>
+          <h3 class="font-serif text-lg font-bold text-white mb-2" x-text="t('features.f6.title')"></h3>
+          <p class="text-white/60 text-xs md:text-sm leading-relaxed" x-text="t('features.f6.desc')"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section Narrative -->
+  <section id="about" class="py-20 bg-[#FFF8F0] px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16">
+        <span class="text-[#F4A261] tracking-widest text-[#2C1810]/70 uppercase block mb-3 font-bold" x-text="t('about.tag')"></span>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold" x-text="t('about.heroSub')"></h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-24">
+        <div>
+          <span class="text-[#F4A261] tracking-widest text-xs font-bold uppercase block mb-2" x-text="t('about.s1.tag')"></span>
+          <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#2C1810] mb-5 leading-tight">
+            <span x-show="lang === 'en'">Heart &amp; Soul in <span class="italic text-[#F4A261]">Every Bite</span></span>
+            <span x-show="lang === 'de'">Herz &amp; Seele in <span class="italic text-[#F4A261]">jedem Bissen</span></span>
+          </h2>
+          <p class="text-[#6B4C3B] text-sm md:text-base leading-relaxed mb-4" x-text="t('about.s1.p1')"></p>
+          <p class="text-[#6B4C3B] text-sm md:text-base leading-relaxed" x-text="t('about.s1.p2')"></p>
+        </div>
+        <div class="relative aspect-[4/3] bg-gradient-to-tr from-[#E9C46A] via-[#F4A261] to-[#E07A5F] rounded-3xl p-6 shadow-xl flex flex-col justify-center items-center text-center overflow-hidden">
+          <span class="text-4xl block mb-2 animate-bounce">🥐</span>
+          <p class="font-serif text-lg font-bold text-white mb-1" x-text="lang === 'en' ? 'Authentic Bakery Craft' : 'Echtes Backhandwerk'"></p>
+          <p class="text-white/80 text-xs tracking-wider uppercase font-semibold" x-text="lang === 'en' ? 'Fresh Every Morning' : 'Jeden Morgen frisch'"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Menu Section with live search + tab filter -->
+  <section id="menu" class="bg-[#FFF8F0] py-20 px-4 border-t border-[#D4A373]/15">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <span class="text-[#F4A261] tracking-widest text-xs font-bold uppercase block mb-3 animate-pulse" x-text="t('menu.tag')"></span>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-[#2C1810]">
+          <span x-show="lang === 'en'">Our <span class="italic text-[#F4A261]">Menu</span></span>
+          <span x-show="lang === 'de'">Unsere <span class="italic text-[#D4A373]">Speisekarte</span></span>
+        </h2>
+        <p class="text-[#9B7B6A] text-xs sm:text-sm mt-3" x-text="t('menu.sub')"></p>
+      </div>
+
+      <!-- Tab Selectors -->
+      <div class="flex overflow-x-auto scrollbar-none gap-2 mb-10 pb-2 justify-start md:justify-center">
+        <template x-for="cat in menuData">
+          <button @click="activeCat = cat.id; searchQuery = ''" 
+                  :class="activeCat === cat.id ? 'bg-[#8B5E3C] text-white' : 'bg-white hover:bg-[#FFF8F0] border border-[#D4A373]/20'"
+                  class="flex items-center gap-2 py-2.5 px-4 rounded-full text-xs font-bold uppercase whitespace-nowrap cursor-pointer transition-all">
+            <span x-text="cat.icon"></span>
+            <span x-text="t('menu.cat.' + cat.id)"></span>
+          </button>
+        </template>
+      </div>
+
+      <!-- Live Search input -->
+      <div class="relative max-w-md mx-auto mb-16">
+        <input type="text" x-model="searchQuery" :placeholder="lang === 'en' ? 'Search dishes or pastries...' : 'Gerichte oder Gebäck suchen...'" 
+               class="w-full pl-6 pr-4 py-3 bg-white border-2 border-[#D4A373]/20 rounded-xl focus:border-[#F4A261] outline-none text-sm transition-all shadow-sm">
+      </div>
+
+      <!-- Selected items layout -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <template x-for="item in getFilteredItems()">
+          <div class="bg-white border border-[#D4A373]/15 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+            <div>
+              <div class="h-[120px] rounded-xl bg-gradient-to-br from-[#FFF3E4] to-[#FFE5C4] flex items-center justify-center text-4xl mb-4" x-text="item.placeholder"></div>
+              <h3 class="font-serif text-base font-bold text-[#2C1810] mb-1.5" x-text="t(item.nameKey)"></h3>
+              <p class="text-xs text-[#9B7B6A] leading-relaxed" x-text="t(item.descKey)"></p>
+            </div>
+            <div x-show="item.tagKey" class="mt-4">
+              <span class="text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-100 text-[#E07A5F]" x-text="t(item.tagKey)"></span>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </section>
+
+  <!-- Review/Testimonials Section -->
+  <section id="reviews" class="bg-gradient-to-br from-[#E07A5F] via-[#D8A7B1] to-[#F4A261] py-20 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <span class="text-[#2C1810]/70 tracking-widest text-xs font-bold uppercase block mb-3" x-text="t('reviews.tag')"></span>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-[#2C1810]">
+          <span x-show="lang === 'en'">5 Stars &amp; <span class="italic">Counting</span></span>
+          <span x-show="lang === 'de'">5 Sterne &amp; <span class="italic">Steigend</span></span>
+        </h2>
+      </div>
+
+      <!-- Large overall evaluation card -->
+      <div class="bg-gradient-to-br from-[#2C1810] to-[#452818] rounded-3xl p-8 text-center text-white max-w-md mx-auto mb-16 shadow-xl border border-[#D4A373]/20">
+        <p class="text-xs tracking-widest uppercase text-white/50 block mb-2 font-bold" x-text="t('reviews.overall.label')"></p>
+        <p class="font-serif text-6xl font-black text-[#E9C46A] mb-3">5.0</p>
+        <div class="flex gap-1 justify-center text-[#E9C46A] mb-4">
+          <i data-lucide="star" class="w-5 h-5 fill-[#E9C46A]"></i>
+          <i data-lucide="star" class="w-5 h-5 fill-[#E9C46A]"></i>
+          <i data-lucide="star" class="w-5 h-5 fill-[#E9C46A]"></i>
+          <i data-lucide="star" class="w-5 h-5 fill-[#E9C46A]"></i>
+          <i data-lucide="star" class="w-5 h-5 fill-[#E9C46A]"></i>
+        </div>
+        <p class="text-white/70 text-xs" x-text="t('reviews.overall.sub')"></p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <template x-for="r in reviews">
+          <div class="bg-white rounded-2xl p-6.5 relative shadow-sm hover:shadow-lg transition-all flex flex-col justify-between">
+            <div>
+              <div class="flex gap-1 text-[#E9C46A] mb-3">
+                <i data-lucide="star" class="w-4 h-4 fill-[#E9C46A]"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-[#E9C46A]"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-[#E9C46A]"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-[#E9C46A]"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-[#E9C46A]"></i>
+              </div>
+              <p class="text-[#3D2B1F] text-sm md:text-base leading-relaxed italic mb-6" x-text="t(r.textKey)"></p>
+            </div>
+            
+            <div class="flex items-center gap-3 border-t border-[#D4A373]/10 pt-4 mt-2">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#F4A261] to-[#E9C46A] flex items-center justify-center font-bold text-xs" x-text="r.avatar"></div>
+              <div>
+                <h4 class="text-[#2C1810] font-bold text-xs sm:text-sm" x-text="r.name"></h4>
+                <p class="text-[#9B7B6A] text-[10px] md:text-xs" x-text="t(r.subKey)"></p>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reservation & Contacts -->
+  <section id="contact" class="bg-[#FFF8F0] py-20 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <!-- Details -->
+        <div class="bg-white border border-[#D4A373]/15 rounded-3xl p-8 shadow-sm flex flex-col gap-6">
+          <div>
+            <span class="text-[#F4A261] tracking-widest text-[10px] font-bold uppercase block mb-1" x-text="t('contact.info.tag')"></span>
+            <h2 class="font-serif text-2xl font-bold text-[#2C1810]">
+              <span x-show="lang === 'en'">Get in <span class="italic text-[#F4A261]">Touch</span></span>
+              <span x-show="lang === 'de'">Kontakt <span class="italic text-[#F4A261]">aufnehmen</span></span>
+            </h2>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="w-[44px] h-[44px] rounded-full bg-[#FFF3E4] text-[#E07A5F] flex items-center justify-center flex-shrink-0 shadow-sm">
+              <i data-lucide="map-pin" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold tracking-widest uppercase text-[#F4A261] block mb-1" x-text="t('contact.address.label')"></span>
+              <p class="text-sm text-[#2C1810]">Metro Street, Touristic Villages, Hurghada, Red Sea, Egypt</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="w-[44px] h-[44px] rounded-full bg-[#E8F5E9] text-[#588157] flex items-center justify-center flex-shrink-0 shadow-sm">
+              <i data-lucide="phone" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold tracking-widest uppercase text-[#F4A261] block mb-1" x-text="t('contact.phone.label')"></span>
+              <a href="tel:01038135123" class="text-sm font-bold text-[#2C1810] hover:text-[#F4A261]">010 3813 5123</a>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="w-[44px] h-[44px] rounded-full bg-[#EDE7F6] text-[#8B5E3C] flex items-center justify-center flex-shrink-0 shadow-sm">
+              <i data-lucide="facebook" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold tracking-widest uppercase text-[#F4A261] block mb-1">Facebook</span>
+              <a href="https://www.facebook.com/share/p/1KzieJRSiZ/" target="_blank" class="text-sm font-bold text-[#2C1810] hover:text-[#F4A261] underline" x-text="t('contact.fbLink')"></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reservation Form -->
+        <div class="bg-white border border-[#D4A373]/15 rounded-3xl p-8 shadow-sm">
+          <div class="text-center mb-6">
+            <span class="text-[#F4A261] tracking-widest text-[10px] font-bold uppercase block mb-1" x-text="t('contact.form.tag')"></span>
+            <h2 class="font-serif text-2xl font-bold text-[#2C1810]" x-text="t('contact.form.title')"></h2>
+          </div>
+
+          <form @submit.prevent="submitRes()" class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold uppercase tracking-wider text-[#9B7B6A]" x-text="t('form.name')"></label>
+              <input type="text" required class="w-full px-3 py-2 bg-[#FFF8F0]/40 border-2 border-[#D4A373]/20 rounded-xl outline-none">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold uppercase tracking-wider text-[#9B7B6A]" x-text="t('form.email')"></label>
+              <input type="email" required class="w-full px-3 py-2 bg-[#FFF8F0]/40 border-2 border-[#D4A373]/20 rounded-xl outline-none">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold uppercase tracking-wider text-[#9B7B6A]" x-text="t('form.phone')"></label>
+              <input type="text" class="w-full px-3 py-2 bg-[#FFF8F0]/40 border-2 border-[#D4A373]/20 rounded-xl outline-none">
+            </div>
+            <button type="submit" class="mt-4 px-10 py-3 bg-gradient-to-r from-[#F4A261] to-[#E9C46A] text-[#2C1810] rounded-xl font-bold uppercase text-xs" x-text="isSubbed ? 'Sent! ✓' : t('form.submit')"></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Universal Footer -->
+  <footer class="relative bg-gradient-to-br from-[#1A0A06] to-[#2C1810] text-white pt-20 pb-8 px-4 border-t border-white/5">
+    <div class="max-w-5xl mx-auto text-center md:text-left grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+      <div>
+        <h3 class="font-serif text-xl font-bold text-white mb-1">Heart of Styria</h3>
+        <p class="text-[#D8A7B1] text-[10px] tracking-widest uppercase font-bold" x-text="t('footer.sub')"></p>
+        <p class="text-white/40 text-xs mt-4" x-text="t('footer.desc')"></p>
+      </div>
+      <div>
+        <h4 class="text-[#E9C46A] text-xs tracking-widest uppercase font-black mb-5" x-text="t('footer.nav')"></h4>
+        <ul class="flex flex-col gap-2 p-0 list-none m-0">
+          <li><button @click="scrollToSection('hero')" class="text-white/50 hover:text-[#E9C46A] text-xs font-bold uppercase">Home</button></li>
+          <li><button @click="scrollToSection('about')" class="text-white/50 hover:text-[#E9C46A] text-xs font-bold uppercase">About</button></li>
+          <li><button @click="scrollToSection('menu')" class="text-white/50 hover:text-[#E9C46A] text-xs font-bold uppercase">Menu</button></li>
+          <li><button @click="scrollToSection('reviews')" class="text-white/50 hover:text-[#E9C46A] text-xs font-bold uppercase">Reviews</button></li>
+          <li><button @click="scrollToSection('contact')" class="text-white/50 hover:text-[#E9C46A] text-xs font-bold uppercase">Contact</button></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-[#E9C46A] text-xs tracking-widest uppercase font-black mb-5">Contact</h4>
+        <p class="text-white/50 text-xs mb-2">📍 Metro Street, Touristic Villages, Hurghada, Egypt</p>
+        <p class="text-white/50 text-xs mb-2">📞 010 3813 5123</p>
+        <p class="text-white/50 text-xs">🕒 Sat–Thu: 09:00–23:00</p>
+      </div>
+    </div>
+    <div class="border-t border-white/5 pt-6 text-center max-w-5xl mx-auto">
+      <p class="text-white/30 text-xs" x-text="t('footer.copy')"></p>
+    </div>
+  </footer>
+
+  <!-- Application translations and setup -->
+  <script>
+    function appState() {
+      return {
+        lang: 'en',
+        isScrolled: false,
+        isLangOpen: false,
+        isMobileMenuOpen: false,
+        activeSection: 'hero',
+        sliderPos: 50,
+        activeCat: 'bakery',
+        searchQuery: '',
+        isSubbed: false,
+        
+        init() {
+          window.addEventListener('scroll', () => {
+            this.isScrolled = window.scrollY > 30;
+          });
+          
+          // Render Lucide icons initially & on change
+          lucide.createIcons();
+          this.$watch('isMobileMenuOpen', () => this.recallIcons());
+          this.$watch('isLangOpen', () => this.recallIcons());
+        },
+
+        recallIcons() {
+          setTimeout(() => lucide.createIcons(), 50);
+        },
+
+        scrollToSection(id) {
+          const el = document.getElementById(id);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+            this.activeSection = id;
+          }
+        },
+
+        moveSlider(e) {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          this.sliderPos = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        },
+
+        moveSliderTouch(e) {
+          if (e.touches && e.touches[0]) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.touches[0].clientX - rect.left;
+            this.sliderPos = Math.max(0, Math.min(100, (x / rect.width) * 100));
+          }
+        },
+
+        submitRes() {
+          this.isSubbed = true;
+          setTimeout(() => this.isSubbed = false, 4000);
+        },
+        
+        getFilteredItems() {
+          const cat = this.menuData.find(c => c.id === this.activeCat);
+          if (!cat) return [];
+          if (!this.searchQuery) return cat.items;
+          const query = this.searchQuery.toLowerCase();
+          return cat.items.filter(item => {
+            return this.t(item.nameKey).toLowerCase().includes(query) || 
+                   this.t(item.descKey).toLowerCase().includes(query);
+          });
+        },
+
+        t(key) {
+          return this.translations[this.lang][key] || key;
+        },
+
+        translations: {
+          en: {
+            "nav.sub": "Austrian Bakery & Restaurant",
+            "nav.home": "Home", "nav.about": "About", "nav.menu": "Menu", "nav.reviews": "Reviews", "nav.contact": "Contact",
+            "hero.eyebrow": "Hurghada, Red Sea · Est. 2024",
+            "hero.tagline": "Vom Herzen — Made with Heart",
+            "hero.desc": "A true taste of Austria in the heart of Egypt. Fresh-baked breads, Styrian pastries, and hearty Austrian cuisine — crafted daily with passion on the shores of the Red Sea.",
+            "hero.btn1": "Explore Menu", "hero.btn2": "Visit Us",
+            "scroll.hint": "Scroll to explore", "scroll.tag": "Two Worlds, One Taste",
+            "scroll.contentDesc": "Where the mountain pastry traditions of Styria meet the warm shores of the Egyptian Red Sea. Two cultures, one kitchen, crafted with heart.",
+            "img.hurghada": "Red Sea, Egypt · Our Home", "img.austria": "Our Culinary Heritage",
+            "features.tag": "Why Choose Us",
+            "features.f1.title": "Fresh Austrian Pastries", "features.f1.desc": "Buttery croissants, strudel and Mehlspeisen baked fresh every morning",
+            "features.f2.title": "Artisan Bakery", "features.f2.desc": "Hand-crafted breads and rolls using traditional Austrian recipes and techniques",
+            "features.f3.title": "Premium Coffee", "features.f3.desc": "Viennese Melange, Einspänner and authentic Austrian coffee culture",
+            "features.f4.title": "Austrian Cuisine", "features.f4.desc": "Schnitzel, Gulasch, Strudel and classic Styrian dishes with authentic flavour",
+            "features.f5.title": "Warm Hospitality", "features.f5.desc": "Wheelchair accessible, all group sizes welcome, no waiting — like family",
+            "features.f6.title": "Fair Prices", "features.f6.desc": "Outstanding quality at honest prices — the best value European restaurant in Hurghada",
+            "about.tag": "Our Story", "about.heroSub": "A hidden gem bringing the soul of Styria to Hurghada",
+            "about.s1.tag": "A Hidden Gem", "about.s1.p1": "Heart of Styria — formerly known as Mr. Hans — is Hurghada's most beloved Austrian bakery and restaurant. We bring the soulful flavours of Styria to Egypt.",
+            "about.s1.p2": "For too long, Hurghada lacked a place where you could enjoy a proper Wiener Frühstück or enjoy a warm Apfelstrudel. We changed that.",
+            "menu.tag": "Crafted with Passion", "menu.sub": "From morning pastries to evening mains — made fresh daily",
+            "menu.cat.bakery": "Bakery & Pastries", "menu.cat.bread": "Bread Selection", "menu.cat.coffee": "Coffee & Drinks", "menu.cat.cakes": "Cakes & Desserts", "menu.cat.austrian": "Austrian Specialties", "menu.cat.kebab": "Kebab House",
+            "menu.bakery.title": "Bakery & Pastries", "menu.bakery.desc": "Handcrafted daily using traditional Austrian recipes",
+            "menu.bakery.i1.name": "Butter Croissant", "menu.bakery.i1.desc": "Classic flaky croissant, laminated and baked fresh every morning.",
+            "menu.bakery.i2.name": "Laugenbrezel", "menu.bakery.i2.desc": "Traditional lye pretzel with coarse salt — soft inside and chewable.",
+            "menu.bakery.i3.name": "Afternoon Pastry Box", "menu.bakery.i3.desc": "A curated selection of today's freshest baked goods.",
+            "menu.bakery.i4.name": "Vollkornbrot", "menu.bakery.i4.desc": "Dense hearty wholegrain rye bread.",
+            "menu.bread.title": "Bread", "menu.bread.desc": "Sourdough and rye loaves",
+            "menu.bread.i1.name": "Sourdough Loaf", "menu.bread.i1.desc": "Long-fermented sourdough with a crispy crust.",
+            "menu.bread.i2.name": "Kaiser Rolls", "menu.bread.i2.desc": "Classic Viennese breakfast rolls — crispy outside.",
+            "menu.coffee.title": "Coffee", "menu.coffee.desc": "Viennese coffee culture",
+            "menu.coffee.i1.name": "Wiener Melange", "menu.coffee.i1.desc": "Vienna's iconic coffee — espresso with steamed milk and cream.",
+            "menu.coffee.i2.name": "Einspänner", "menu.coffee.i2.desc": "Double espresso topped with fresh whipped cream.",
+            "menu.cakes.title": "Cakes", "menu.cakes.desc": "Austria's sweet tradition",
+            "menu.cakes.i1.name": "Apfelstrudel", "menu.cakes.i1.desc": "Warm apple strudel with cinnamon, served with vanilla sauce.",
+            "menu.cakes.i2.name": "Sachertorte", "menu.cakes.i2.desc": "Legendary chocolate cake with apricot jam and dark glaze.",
+            "menu.austrian.title": "Austrian Cuisine", "menu.austrian.desc": "Hearty, soul-warming specialties",
+            "menu.austrian.i1.name": "Wiener Schnitzel", "menu.austrian.i1.desc": "Golden, thin-pounded veal escalope with potato-cucumber salad.",
+            "menu.austrian.i2.name": "Styrian Beef Gulasch", "menu.austrian.i2.desc": "Slow-cooked tender beef in paprika with Semmelknödel.",
+            "menu.kebab.title": "Kebab House", "menu.kebab.desc": "Grilled specialties",
+            "menu.kebab.i1.name": "Mixed Kebab Platter", "menu.kebab.i1.desc": "Chicken, lamb and kofta skewers.",
+            "tag.daily": "Daily Fresh", "tag.classic": "Austrian Classic", "tag.takeaway": "Take Away", "tag.veg": "Vegetarian", "tag.signature": "Signature", "tag.viennese": "Viennese Classic", "tag.local": "Local Flavours", "tag.housespecial": "House Special",
+            "reviews.tag": "What Guests Say",
+            "reviews.overall.label": "Overall Rating on Google",
+            "reviews.overall.sub": "Perfect Score · Google Reviews · Hurghada, Egypt",
+            "reviews.r1.text": "\"Geheimtipp in Hurghada – absolute Empfehlung! Hervorragende Qualität, freundlicher Service und faire Preise.\"",
+            "reviews.r1.sub": "La Familia World · Google Review",
+            "reviews.r2.text": "\"Das beste österreichische Frühstück, das ich je außerhalb Österreichs gegessen habe. Klare Empfehlung!\"",
+            "reviews.r2.sub": "Google Review · Hurghada",
+            "contact.tag": "Come Visit Us", "contact.sub": "We would love to welcome you to our table",
+            "contact.form.tag": "Send a Message", "contact.form.title": "Make a Reservation",
+            "contact.info.tag": "Contact Details", "contact.address.label": "Address", "contact.phone.label": "Phone", "contact.hours.label": "Hours",
+            "form.name": "Your Name", "form.email": "Email", "form.phone": "Phone Number", "form.submit": "Submit Message",
+            "footer.sub": "Austrian Bakery & Restaurant · Hurghada",
+            "footer.desc": "A taste of Austria in Egypt. Fresh-baked pastries, authentic cuisine and warm hospitality on the shores of the Red Sea.",
+            "footer.nav": "Navigation",
+            "footer.copy": "© 2025 Heart of Styria · Austrian Bakery & Restaurant · Hurghada, Egypt"
+          },
+          de: {
+            "nav.sub": "Österreichische Bäckerei & Restaurant",
+            "nav.home": "Start", "nav.about": "Über uns", "nav.menu": "Speisekarte", "nav.reviews": "Bewertungen", "nav.contact": "Kontakt",
+            "hero.eyebrow": "Hurghada, Rotes Meer · Seit 2024",
+            "hero.tagline": "Vom Herzen gemacht",
+            "hero.desc": "Echter Geschmack Österreichs im Herzen Ägyptens. Frisch gebackene Brote, steirische Spezialitäten und herzhafte österreichische Küche — täglich mit Leidenschaft zubereitet.",
+            "hero.btn1": "Speisekarte entdecken", "hero.btn2": "Besuchen Sie uns",
+            "scroll.hint": "Scrollen zum Erkunden", "scroll.tag": "Zwei Welten, ein Geschmack",
+            "scroll.contentDesc": "Wo die Backtraditionen der Steiermark auf die warmen Ufer des Roten Meeres treffen. Zwei Kulturen, eine Küche, mit Herzblut gemacht.",
+            "img.hurghada": "Rotes Meer, Ägypten · Unser Zuhause", "img.austria": "Unser kulinarisches Erbe",
+            "features.tag": "Warum wir?",
+            "features.f1.title": "Frische Backwaren", "features.f1.desc": "Butterige Croissants, Strudel und Mehlspeisen täglich frisch gebacken",
+            "features.f2.title": "Handwerksbäckerei", "features.f2.desc": "Handgefertigte Brote nach traditionellen österreichischen Rezepten",
+            "features.f3.title": "Premium-Kaffee", "features.f3.desc": "Wiener Melange, Einspänner und echte österreichische Kaffeekultur",
+            "features.f4.title": "Österreichische Küche", "features.f4.desc": "Schnitzel, Gulasch, Strudel und klassische steirische Gerichte",
+            "features.f5.title": "Herzliche Gastfreundschaft", "features.f5.desc": "Rollstuhlgerecht, für alle Gruppengrößen, keine Wartezeit",
+            "features.f6.title": "Faire Preise", "features.f6.desc": "Hervorragende Qualität zu ehrlichen Preisen — bestes Preis-Leistungs-Verhältnis",
+            "about.tag": "Unsere Geschichte", "about.heroSub": "Ein Geheimtipp, der die Seele der Steiermark nach Hurghada bringt",
+            "about.s1.tag": "Ein Geheimtipp", "about.s1.p1": "Heart of Styria ist Hurghadas beliebteste österreichische Bäckerei und Restaurant. Wir bringen die seelenvollen Aromen der Steiermark nach Ägypten.",
+            "about.s1.p2": "Zu lange fehle in Hurghada ein Ort mit echtem Heimatgeschmack. Das haben wir geändert.",
+            "menu.tag": "Mit Leidenschaft zubereitet", "menu.sub": "Vom Morgengebäck bis zu herzhaften Hauptspeisen — täglich frisch",
+            "menu.cat.bakery": "Bäckerei", "menu.cat.bread": "Brot", "menu.cat.coffee": "Kaffee", "menu.cat.cakes": "Kuchen", "menu.cat.austrian": "Österreichisch", "menu.cat.kebab": "Kebab",
+            "menu.bakery.title": "Bäckerei & Gebäck", "menu.bakery.desc": "Täglich handgefertigt nach traditionellen Rezepten",
+            "menu.bakery.i1.name": "Buttercroissant", "menu.bakery.i1.desc": "Klassisches blättriges Croissant, laminiert und jeden Morgen frisch gebacken.",
+            "menu.bakery.i2.name": "Laugenbrezel", "menu.bakery.i2.desc": "Traditionelle Laugenbrezel mit grobem Salz — innen weich.",
+            "menu.bakery.i3.name": "Gebäckbox", "menu.bakery.i3.desc": "Eine erlesene Auswahl unserer frischsten Backwaren.",
+            "menu.bakery.i4.name": "Vollkornbrot", "menu.bakery.i4.desc": "Herzhaftes Vollkornbrot — ein fester Bestandteil.",
+            "menu.bread.title": "Brot", "menu.bread.desc": "Ofenfrisches Sauerteig- und Roggenbrot",
+            "menu.bread.i1.name": "Sauerteigbrot", "menu.bread.i1.desc": "Lang fermentiertes Sauerteigbrot mit knuspriger Rinde.",
+            "menu.bread.i2.name": "Kaisersemmeln", "menu.bread.i2.desc": "Klassische Wiener Frühstücksbrötchen.",
+            "menu.coffee.title": "Kaffee", "menu.coffee.desc": "Wiener Kaffeekultur",
+            "menu.coffee.i1.name": "Wiener Melange", "menu.coffee.i1.desc": "Wiens Kaffee-Klassiker — kräftiger Espresso mit gedämpfter Milch.",
+            "menu.coffee.i2.name": "Einspänner", "menu.coffee.i2.desc": "Doppelter Mokka im Glas mit Schlagobers.",
+            "menu.cakes.title": "Kuchen", "menu.cakes.desc": "Österreichs süße Verführung",
+            "menu.cakes.i1.name": "Apfelstrudel", "menu.cakes.i1.desc": "Ofenfrischer Apfelstrudel mit Zimt und Rosinen, serviert mit Vanillesauce.",
+            "menu.cakes.i2.name": "Sachertorte", "menu.cakes.i2.desc": "Wiens weltberühmte Schokoladentorte mit feiner Marillenmarmelade.",
+            "menu.austrian.title": "Österreichische Gerichte", "menu.austrian.desc": "Herzhafte Spezialitäten",
+            "menu.austrian.i1.name": "Wiener Schnitzel", "menu.austrian.i1.desc": "Hauchdünnes panierte Schnitzel mit Gurkensalat.",
+            "menu.austrian.i2.name": "Steirisches Gulasch", "menu.austrian.i2.desc": "Langsam geschmortes Rindfleisch mit Knödel.",
+            "menu.kebab.title": "Kebab-Haus", "menu.kebab.desc": "Grillspezialitäten",
+            "menu.kebab.i1.name": "Kebab-Platte", "menu.kebab.i1.desc": "Gemischte Spieße mit Reis und Beilagen.",
+            "tag.daily": "Täglich frisch", "tag.classic": "Austrian Classic", "tag.takeaway": "Take Away", "tag.veg": "Vegetarisch", "tag.signature": "Signature", "tag.viennese": "Wiener Melange", "tag.local": "Lokale Früchte", "tag.housespecial": "Spezialität des Hauses",
+            "reviews.tag": "Gästebewertungen",
+            "reviews.overall.label": "Gesamtbewertung auf Google",
+            "reviews.overall.sub": "Ausgezeichnet mit 5.0 · Google Bewertungen · Hurghada, Ägypten",
+            "reviews.r1.text": "\"Geheimtipp in Hurghada – absolute Empfehlung! Hervorragende Qualität, freundlicher Service und faire Preise.\"",
+            "reviews.r1.sub": "La Familia World · Google Bewertung",
+            "reviews.r2.text": "\"Das beste österreichische Frühstück, das ich je außerhalb Österreichs gegessen habe. Klare Empfehlung!\"",
+            "reviews.r2.sub": "Google Bewertung · Hurghada",
+            "contact.tag": "Besuchen Sie uns", "contact.sub": "Wir freuen und darauf, Sie begrüßen zu dürfen",
+            "contact.form.tag": "Nachricht senden", "contact.form.title": "Tischreservierung anfragen",
+            "contact.info.tag": "Kontaktdetails", "contact.address.label": "Adresse", "contact.phone.label": "Telefon", "contact.hours.label": "Öffnungszeiten",
+            "form.name": "Ihr Name", "form.email": "E-Mail-Adresse", "form.phone": "Telefonnummer", "form.submit": "Nachricht abschicken",
+            "footer.sub": "Österreichische Bäckerei & Restaurant · Hurghada",
+            "footer.desc": "Ein echtes Stück Österreich an Ägyptens sonnigem Gestade.",
+            "footer.nav": "Navigation",
+            "footer.copy": "© 2025 Heart of Styria · Bäckerei & Restaurant · Hurghada, Ägypten"
+          }
+        },
+
+        menuData: [
+          {
+            id: 'bakery',
+            icon: '🥐',
+            items: [
+              { id: 'b1', nameKey: 'menu.bakery.i1.name', descKey: 'menu.bakery.i1.desc', placeholder: '🥐', tagKey: 'tag.daily' },
+              { id: 'b2', nameKey: 'menu.bakery.i2.name', descKey: 'menu.bakery.i2.desc', placeholder: '🥨', tagKey: 'tag.classic' },
+              { id: 'b3', nameKey: 'menu.bakery.i3.name', descKey: 'menu.bakery.i3.desc', placeholder: '🧁', tagKey: 'tag.takeaway' },
+              { id: 'b4', nameKey: 'menu.bakery.i4.name', descKey: 'menu.bakery.i4.desc', placeholder: '🍞', tagKey: 'tag.veg' }
+            ]
+          },
+          {
+            id: 'bread',
+            icon: '🍞',
+            items: [
+              { id: 'br1', nameKey: 'menu.bread.i1.name', descKey: 'menu.bread.i1.desc', placeholder: '🍞', tagKey: 'tag.daily' },
+              { id: 'br2', nameKey: 'menu.bread.i2.name', descKey: 'menu.bread.i2.desc', placeholder: '🥖', tagKey: 'tag.classic' }
+            ]
+          },
+          {
+            id: 'coffee',
+            icon: '☕',
+            items: [
+              { id: 'c1', nameKey: 'menu.coffee.i1.name', descKey: 'menu.coffee.i1.desc', placeholder: '☕', tagKey: 'tag.viennese' },
+              { id: 'c2', nameKey: 'menu.coffee.i2.name', descKey: 'menu.coffee.i2.desc', placeholder: '☕', tagKey: 'tag.signature' }
+            ]
+          },
+          {
+            id: 'cakes',
+            icon: '🎂',
+            items: [
+              { id: 'ck1', nameKey: 'menu.cakes.i1.name', descKey: 'menu.cakes.i1.desc', placeholder: '🍎', tagKey: 'tag.housespecial' },
+              { id: 'ck2', nameKey: 'menu.cakes.i2.name', descKey: 'menu.cakes.i2.desc', placeholder: '🍫', tagKey: 'tag.viennese' }
+            ]
+          },
+          {
+            id: 'austrian',
+            icon: '🍽️',
+            items: [
+              { id: 'a1', nameKey: 'menu.austrian.i1.name', descKey: 'menu.austrian.i1.desc', placeholder: '🥩', tagKey: 'tag.signature' },
+              { id: 'a2', nameKey: 'menu.austrian.i2.name', descKey: 'menu.austrian.i2.desc', placeholder: '🥘', tagKey: 'tag.classic' }
+            ]
+          },
+          {
+            id: 'kebab',
+            icon: '🥙',
+            items: [
+              { id: 'k1', nameKey: 'menu.kebab.i1.name', descKey: 'menu.kebab.i1.desc', placeholder: '🥙', tagKey: 'tag.local' }
+            ]
+          }
+        ],
+
+        reviews: [
+          { id: 'rv1', avatar: 'DS', name: 'Daniela & Siggi', rating: 5, textKey: 'reviews.r1.text', subKey: 'reviews.r1.sub' },
+          { id: 'rv2', avatar: 'MK', name: 'Maria K.', rating: 5, textKey: 'reviews.r2.text', subKey: 'reviews.r2.sub' }
+        ]
+      }
+    }
+  </script>
+</body>
+</html>
